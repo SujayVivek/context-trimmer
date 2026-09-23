@@ -1,0 +1,33 @@
+{
+  "name": "context-sieve",
+  "version": "0.1.0",
+  "description": "Model-independent context-trimming and compaction tool for AI coding assistant conversation history",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "keywords": [
+    "context",
+    "compaction",
+    "llm",
+    "ai",
+    "trimming"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.5.0",
+    "vitest": "^2.0.0"
+  }
+}
