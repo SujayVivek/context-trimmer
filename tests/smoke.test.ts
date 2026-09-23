@@ -37,23 +37,23 @@ describe('ContextSieve Foundation Smoke Test', () => {
   });
 
   it('should construct compact state snapshots', () => {
+    const userMsg: Message = { role: 'user', text: 'Read src/index.ts' };
     const toolCall: ToolCall = {
       id: 't1',
       tool_use_id: 'tu_123',
       tool: 'read_file',
       input: { path: 'src/index.ts' },
-      callIndex: 1,
-      resultIndex: 2,
+      callIndex: 0,
+      resultIndex: 1,
       resultChars: 500,
       isError: false,
       pinned: false,
     };
 
-    const state = createCompactionState([toolCall], 'Summary of past steps');
+    const state = createCompactionState([userMsg], [toolCall], 'Summary of past steps');
 
-    expect(state.toolCalls).toHaveLength(1);
-    expect(state.totalChars).toBe(500);
-    expect(state.summary).toBe('Summary of past steps');
+    expect(state.history).toHaveLength(1);
+    expect(state.goal).toBe('Summary of past steps');
   });
 
   it('should support model-independent DecisionBackend contract implementation', async () => {
@@ -72,7 +72,7 @@ describe('ContextSieve Foundation Smoke Test', () => {
     }
 
     const backend = new MockDecisionBackend();
-    const state = createCompactionState([]);
+    const state = createCompactionState([], []);
     const question: DecisionQuestion = {
       id: 'q1',
       toolCallId: 't1',
