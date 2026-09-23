@@ -2,12 +2,11 @@ import { describe, it, expect } from 'vitest';
 import {
   createTranscript,
   createCompactionState,
+  MockDecisionBackend,
+  getChoiceAnswer,
   type Message,
   type ToolCall,
-  type DecisionBackend,
-  type DecisionQuestion,
-  type DecisionAnswer,
-  type CompactionState,
+  type DecisionQuestions,
 } from '../src/index.js';
 
 describe('ContextSieve Foundation Smoke Test', () => {
@@ -57,32 +56,28 @@ describe('ContextSieve Foundation Smoke Test', () => {
   });
 
   it('should support model-independent DecisionBackend contract implementation', async () => {
-    class MockDecisionBackend implements DecisionBackend {
-      async ask(
-        _state: CompactionState,
-        questions: DecisionQuestion[]
-      ): Promise<DecisionAnswer[]> {
-        return questions.map((q) => ({
-          questionId: q.id,
-          toolCallId: q.toolCallId,
-          action: 'keep',
-          reasoning: 'Tool call is relevant for future steps',
-        }));
-      }
-    }
+    const backend = new MockDecisionBackend({
+      q1: {
+        type: 'choice',
+        choice: 'keep',
+        confidence: 0.95,
+        probabilities: { keep: 0.95, trim: 0.05 },
+      },
+    });
 
-    const backend = new MockDecisionBackend();
     const state = createCompactionState([], []);
-    const question: DecisionQuestion = {
-      id: 'q1',
-      toolCallId: 't1',
-      prompt: 'Is reading src/index.ts still necessary?',
+    const questions: DecisionQuestions = {
+      q1: {
+        type: 'choice',
+        instructions: 'Should t1 be kept?',
+        criteria: { keep: 'Keep tool call', trim: 'Trim tool call' },
+      },
     };
 
-    const answers = await backend.ask(state, [question]);
+    const response = await backend.ask(state, questions);
 
-    expect(answers).toHaveLength(1);
-    expect(answers[0]?.action).toBe('keep');
-    expect(answers[0]?.toolCallId).toBe('t1');
+    expect(response.model).toBe('mock-decision-backend');
+    const answer = getChoiceAnswer(response, 'q1');
+    expect(answer.choice).toBe('keep');
   });
 });
